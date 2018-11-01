@@ -1,0 +1,14 @@
+<% include partials/header %>
+
+<h1>Campgrounds!</h1>
+
+<ul>
+  <% campgrounds.forEach( (campground) => { %>
+    <div>
+      <h4> <%= campground.name %> </h4>  
+      <img src="<%= campground.image %>">
+    </div>
+  <% }); %>
+</ul>
+
+<% include partials/footer %>
