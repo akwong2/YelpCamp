@@ -1,9 +1,20 @@
-let express = require("express");
-let app = express();
-let bodyParser = require("body-parser");
+let express     = require("express"),
+    app         = express(),
+    bodyParser  = require("body-parser"),
+    mongoose    = require("mongoose")
 
+mongoose.connect(process.env.MONGOLAB_URI, { useNewUrlParser: true });
+//mongoose.connect("mongodb://localhost:27017/yelp_camp", { useNewUrlParser: true });
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
+
+// SCHEMA SETUP
+let campgroundsSchema = new mongoose.Schema({
+  name: String,
+  image: String
+});
+
+let Campground = mongoose.model("Campground", campgroundsSchema);
 
 var campgrounds = [
     {name: "Salmon Creek", image:"https://images.unsplash.com/photo-1476041800959-2f6bb412c8ce?ixlib=rb-0.3.5&s=3cea01429048ce122dff533448f43219&auto=format&fit=crop&w=800&q=60"},
@@ -19,15 +30,25 @@ app.get("/", function(req, res) {
 });
 
 app.get("/campgrounds", function(req, res) {
-  res.render("campgrounds", {campgrounds: campgrounds});
+  Campground.find({}, function(err, allCampgrounds) {
+    if (err) console.log(err);
+    else res.render("campgrounds", {campgrounds: allCampgrounds});
+  });
 });
 
 app.post("/campgrounds", function(req, res) {
-  var name = req.body.name;
-  var image = req.body.image;
-  var newCampground = {name:name, image:image};
-  campgrounds.push(newCampground);
-  res.redirect("/campgrounds");
+  let name = req.body.name;
+  let image = req.body.image;
+  let newCampground = {name:name, image:image};
+  
+  Campground.create(newCampground, function(err, newlyCreated) {
+    if (err) {
+      console.log(err)
+    } 
+    else {
+      res.redirect("/campgrounds");
+    }
+  })
 });
 
 app.get("/campgrounds/new", function(req, res) {
