@@ -3,43 +3,49 @@ let express     = require("express"),
     bodyParser  = require("body-parser"),
     mongoose    = require("mongoose")
 
-mongoose.connect(process.env.MONGOLAB_URI, { useNewUrlParser: true });
-//mongoose.connect("mongodb://localhost:27017/yelp_camp", { useNewUrlParser: true });
+//mongoose.connect(process.env.MONGOLAB_URI, { useNewUrlParser: true });
+mongoose.connect("mongodb://localhost:27017/yelp_camp", { useNewUrlParser: true });
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
 
 // SCHEMA SETUP
 let campgroundsSchema = new mongoose.Schema({
   name: String,
-  image: String
+  image: String,
+  description: String
 });
 
 let Campground = mongoose.model("Campground", campgroundsSchema);
 
-var campgrounds = [
-    {name: "Salmon Creek", image:"https://images.unsplash.com/photo-1476041800959-2f6bb412c8ce?ixlib=rb-0.3.5&s=3cea01429048ce122dff533448f43219&auto=format&fit=crop&w=800&q=60"},
-    {name: "Granite Hill", image:"https://images.unsplash.com/photo-1479741044197-d28c298f8c77?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=00a8cfc7aba62bd47f10abd96551cb1d&auto=format&fit=crop&w=800&q=60"},
-    {name: "Mountain Goat Rest", image:"https://images.unsplash.com/photo-1465695954255-a262b0f57b40?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=06d92f647a2937af54f658e199c3d990&auto=format&fit=crop&w=800&q=60"},
-    {name: "Salmon Creek", image:"https://images.unsplash.com/photo-1476041800959-2f6bb412c8ce?ixlib=rb-0.3.5&s=3cea01429048ce122dff533448f43219&auto=format&fit=crop&w=800&q=60"},
-    {name: "Granite Hill", image:"https://images.unsplash.com/photo-1479741044197-d28c298f8c77?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=00a8cfc7aba62bd47f10abd96551cb1d&auto=format&fit=crop&w=800&q=60"},
-    {name: "Mountain Goat Rest", image:"https://images.unsplash.com/photo-1465695954255-a262b0f57b40?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=06d92f647a2937af54f658e199c3d990&auto=format&fit=crop&w=800&q=60"}
-  ];
+// Campground.create(
+//   {
+//     name:"Granite Hill",
+//     image: "https://images.unsplash.com/photo-1533873984035-25970ab07461?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=42b2e0af84cb66075cdfc0957f140652&auto=format&fit=crop&w=500&q=60",
+//     description: "Huge hill, no bathrooms, no water, beautiful granite!"
+//   }, 
+//   function(err, campground) {
+//     if (err) console.log(err)
+//     else console.log(campground)
+//   });
 
 app.get("/", function(req, res) {
   res.render("landing");
 });
 
+// INDEX
 app.get("/campgrounds", function(req, res) {
   Campground.find({}, function(err, allCampgrounds) {
     if (err) console.log(err);
-    else res.render("campgrounds", {campgrounds: allCampgrounds});
+    else res.render("index", {campgrounds: allCampgrounds});
   });
 });
 
+// CREATE
 app.post("/campgrounds", function(req, res) {
   let name = req.body.name;
   let image = req.body.image;
-  let newCampground = {name:name, image:image};
+  let description = req.body.description;
+  let newCampground = {name:name, image:image, description:description};
   
   Campground.create(newCampground, function(err, newlyCreated) {
     if (err) {
@@ -51,8 +57,19 @@ app.post("/campgrounds", function(req, res) {
   })
 });
 
+// NEW
 app.get("/campgrounds/new", function(req, res) {
   res.render("new");
+});
+
+// SHOW
+app.get("/campgrounds/:id", function(req, res) {
+  Campground.findById(req.params.id, function(err, foundCampground) {
+    if (err) console.log(err)
+    else {
+      res.render("show", {campground: foundCampground})
+    }
+  });
 });
 
 app.listen(process.env.PORT, process.env.IP, function() {
