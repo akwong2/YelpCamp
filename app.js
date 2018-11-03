@@ -3,8 +3,8 @@ let express     = require("express"),
     bodyParser  = require("body-parser"),
     mongoose    = require("mongoose")
 
-//mongoose.connect(process.env.MONGOLAB_URI, { useNewUrlParser: true });
-mongoose.connect("mongodb://localhost:27017/yelp_camp", { useNewUrlParser: true });
+mongoose.connect(process.env.MONGOLAB_URI, { useNewUrlParser: true });
+// mongoose.connect("mongodb://localhost:27017/yelp_camp", { useNewUrlParser: true });
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
 
